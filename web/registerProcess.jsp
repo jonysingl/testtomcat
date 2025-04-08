@@ -11,21 +11,28 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
 <%
-  // 获取表单数据
-  String username = request.getParameter("username");
-  String email = request.getParameter("email");
-  String password = request.getParameter("password");
-
-  // 创建User对象
-  User user = new User();
-  user.setUsername(username);
-  user.setEmail(email);
-  user.setPassword(password); // 注意：实际应用中密码应进行哈希处理
-
-  // 创建UserDAOImpl实例
-  UserDAOImpl userDAO = new UserDAOImpl();
-
   try {
+    // 获取表单数据
+    String username = request.getParameter("username");
+    String email = request.getParameter("email");
+    String password = request.getParameter("password");
+    String confirmPassword = request.getParameter("confirm-password");
+
+    // 验证密码是否匹配
+    if (!password.equals(confirmPassword)) {
+      response.sendRedirect("register.jsp?error=密码不匹配");
+      return;
+    }
+
+    // 创建User对象
+    User user = new User();
+    user.setUsername(username);
+    user.setEmail(email);
+    user.setPassword(password);
+
+    // 创建UserDAOImpl实例
+    UserDAOImpl userDAO = new UserDAOImpl();
+
     // 检查用户名和邮箱是否已存在
     if (!userDAO.isUsernameAvailable(username)) {
       response.sendRedirect("register.jsp?error=用户名已存在");
@@ -41,9 +48,9 @@
 
     // 注册成功，重定向到注册页面并显示成功消息
     response.sendRedirect("register.jsp?success=true");
-  } catch (SQLException e) {
+  } catch (Exception e) {
     e.printStackTrace();
-    response.sendRedirect("register.jsp?error=注册失败，请稍后重试");
+    response.sendRedirect("register.jsp?error=注册失败，请稍后重试：" + e.getMessage());
   }
 %>
 
